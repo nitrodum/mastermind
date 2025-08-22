@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
 
@@ -30,7 +31,17 @@ public class GameController {
     }
 
     @PostMapping("/guess")
-    public String guess(@ModelAttribute("game") String guess, Model model) {
+    public String guess(@RequestParam("guess1") int guess1,
+                        @RequestParam("guess2") int guess2,
+                        @RequestParam("guess3") int guess3,
+                        @RequestParam("guess4") int guess4,
+                        Model model) {
+
+        int[] guessArray = new int[]{guess1, guess2, guess3, guess4};
+
+        String guesses = Arrays.toString(guessArray);
+
+        model.addAttribute("Guesses", guesses);
         return "index";
     }
 }

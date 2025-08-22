@@ -8,6 +8,13 @@
 
     <div id="game-board">
         <p>Game board goes here</p>
+        <form th:action="@{/guess}" method="post">
+            <input type="number" name="guess1" min="0" max="7" required/>
+            <input type="number" name="guess2" min="0" max="7" required/>
+            <input type="number" name="guess3" min="0" max="7" required/>
+            <input type="number" name="guess4" min="0" max="7" required/>
+            <button type="submit">Submit Guess</button>
+        </form>
     </div>
 
 </body>
