@@ -9,6 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.Arrays;
+
 
 @Controller
 public class GameController {
@@ -23,7 +25,7 @@ public class GameController {
     @GetMapping("/")
     public String index(Model model) {
         game = gameService.createGame(10);
-        model.addAttribute("MaxAttempts", game.getMaxAttempts());
+
         return "index";
     }
 
