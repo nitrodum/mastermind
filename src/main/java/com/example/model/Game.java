@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
-    private int[] code;
+    private List<Integer> code;
     private int maxAttempts;
     private int attempts;
     private List<Guess> guesses;
 
-    public Game(int[] code, int maxAttempts) {
+    public Game(List<Integer> code, int maxAttempts) {
         this.code = code;
         this.maxAttempts = maxAttempts;
         this.attempts = 0;
@@ -20,11 +20,11 @@ public class Game {
 
     }
 
-    public int[] getCode() {
+    public List<Integer> getCode() {
         return code;
     }
 
-    public void setCode(int[] code) {
+    public void setCode(List<Integer> code) {
         this.code = code;
     }
 
@@ -50,5 +50,10 @@ public class Game {
 
     public void setGuesses(List<Guess> guesses) {
         this.guesses = guesses;
+    }
+
+    public void addGuess(Guess guess) {
+        this.guesses.add(guess);
+        this.attempts++;
     }
 }

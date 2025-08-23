@@ -4,6 +4,8 @@ import com.example.model.Game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class GameService {
 
@@ -15,7 +17,7 @@ public class GameService {
     }
 
     public Game createGame(int maxAttempts) {
-        int[] code = randomOrgService.getRandomCode();
+        List<Integer> code = randomOrgService.getRandomCode();
         return new Game(code, maxAttempts);
     }
 }
