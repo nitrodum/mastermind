@@ -4,6 +4,7 @@ import com.example.model.Feedback;
 import com.example.model.Game;
 import com.example.model.Guess;
 import com.example.service.GameService;
+import com.example.util.GuessChecker;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ public class GameController {
             session.setAttribute("game", game);
         }
 
+        model.addAttribute("code", game.getCode());
         model.addAttribute("guesses", game.getGuesses());
 
         return "index";
@@ -54,7 +56,9 @@ public class GameController {
 
         List<Integer> guessList = List.of(guess1, guess2, guess3, guess4);
 
-        Guess guess = new Guess(guessList, new Feedback());
+        Feedback feedback = GuessChecker.checkGuess(game.getCode(), guessList);
+
+        Guess guess = new Guess(guessList, feedback);
 
         game.addGuess(guess);
 

@@ -9,7 +9,7 @@ public class Guess {
 
     public Guess(List<Integer> guesses, Feedback feedback) {
         this.guesses = guesses;
-
+        this.feedback = feedback;
     }
 
     public List<Integer> getGuesses() {

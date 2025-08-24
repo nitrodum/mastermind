@@ -8,6 +8,7 @@
 
     <div id="game-board">
         <p>Game board goes here</p>
+        <p th:text="${code}">Code</p>
         <form th:action="@{/guess}" method="post">
             <input type="number" name="guess1" min="0" max="7" required/>
             <input type="number" name="guess2" min="0" max="7" required/>
@@ -19,7 +20,7 @@
         <ul>
             <li th:each="guess : ${guesses}">
                 <span th:each="num : ${guess.guesses}" th:text="${num} + ' '"></span>
-                <span th:text="${guess.feedback}"></span>
+                <span th:text="'Feedback object: ' + ${guess.feedback}"></span>
             </li>
         </ul>
     </div>
