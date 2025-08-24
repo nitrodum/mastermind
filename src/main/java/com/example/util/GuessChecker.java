@@ -16,15 +16,15 @@ public class GuessChecker {
             if (codeCopy.get(i).equals(guessCopy.get(i))) {
                 feedback.setCorrectNumbers(feedback.getCorrectNumbers()+1);
                 feedback.setCorrectPositions(feedback.getCorrectPositions()+1);
-                codeCopy.set(i, null);
+                codeCopy.set(i, codeCopy.get(i)*-1);
                 guessCopy.set(i, null);
             }
         }
 
-        for (Integer integer : guess) {
+        for (Integer integer : guessCopy) {
             if (codeCopy.contains(integer)) {
                 feedback.setCorrectNumbers(feedback.getCorrectNumbers() + 1);
-                codeCopy.set(code.indexOf(integer), null);
+                codeCopy.set(codeCopy.indexOf(integer), null);
             }
         }
 

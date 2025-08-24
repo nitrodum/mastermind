@@ -33,6 +33,20 @@ public class GameController {
             session.setAttribute("game", game);
         }
 
+        if (!game.getGuesses().isEmpty()) {
+            Guess lastGuess = game.getGuesses().get(game.getGuesses().size()-1);
+
+            if (lastGuess.getFeedback().getCorrectPositions() == 4 && lastGuess.getFeedback().getCorrectNumbers() == 4) {
+                model.addAttribute("status", "You Win! :)");
+            }
+
+            if (game.getAttempts() >= game.getMaxAttempts()) {
+                model.addAttribute("status", "You Lose! :(");
+            }
+        }
+
+        model.addAttribute("maxAttempts", game.getMaxAttempts());
+        model.addAttribute("attempts", game.getAttempts());
         model.addAttribute("code", game.getCode());
         model.addAttribute("guesses", game.getGuesses());
 
@@ -70,4 +84,5 @@ public class GameController {
         session.removeAttribute("game");
         return "redirect:/";
     }
+
 }

@@ -1,6 +1,7 @@
 package com.example.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -16,15 +17,23 @@ public class RandomOrgService {
     }
 
     public List<Integer> getRandomCode(){
-        String uri = "https://www.random.org/integers/?num=4&min=0&max=7&col=1&base=10&format=plain&rnd=new";
+        List<Integer> code = new ArrayList<>();
 
-        String response = restTemplate.getForObject(uri, String.class);
+        try {
+            String uri = "https://www.random.org/integers/?num=4&min=0&max=7&col=1&base=10&format=plain&rnd=new";
 
-        String[] lines = response.split("\\r?\\n");
-        List<Integer> code = new ArrayList<Integer>();
+            String response = restTemplate.getForObject(uri, String.class);
 
-        for(int i = 0; i < lines.length; i++) {
-            code.add(Integer.parseInt(lines[i].trim()));
+
+            String[] lines = response.split("\\r?\\n");
+            code = new ArrayList<>();
+
+            for (String line : lines) {
+                code.add(Integer.parseInt(line.trim()));
+            }
+        } catch (HttpServerErrorException e) {
+            System.out.println(e.getMessage());
+            code = List.of(1, 2, 1, 2);
         }
         return code;
     }
