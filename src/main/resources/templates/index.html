@@ -9,7 +9,7 @@
     <div id="game-board">
         <span>Game board goes here</span>
         <span>Max Attempts: </span> <span th:text="${maxAttempts}"></span>
-        <span> Attempts Left: </span><span th:text="${attempts}"></span>
+        <span> Attempts Left: </span><span th:text="${maxAttempts - attempts}"></span>
         <p th:text="${code}">Code</p>
         <form th:action="@{/guess}" method="post">
             <input type="number" name="guess1" min="0" max="7" required/>
