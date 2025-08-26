@@ -34,11 +34,13 @@
                 display: flex;
                 align-items: center;
                 gap: 1rem;
+                margin-right: 2rem;
             }
 
             .username {
                 color: #2c3e50;
-                font-weight: 500;
+                font-weight: 700;
+                font-size: 1.1rem;
             }
 
             .btn {
@@ -257,7 +259,8 @@
             <h1>🎯 Mastermind</h1>
             <div class="user-section">
                 <div th:if="${username}" class="username">
-                    <span th:text="${username}"></span>!
+                    <span th:text="${username}"></span>
+                    <a th:href="@{/stats}" class="btn btn-outline">Stats</a>
                     <form th:action="@{/auth/logout}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-danger">Logout</button>
                     </form>

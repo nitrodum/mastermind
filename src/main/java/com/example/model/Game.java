@@ -8,12 +8,14 @@ public class Game {
     private int maxAttempts;
     private int attempts;
     private List<Guess> guesses;
+    private boolean isOver;
 
     public Game(List<Integer> code, int maxAttempts) {
         this.code = code;
         this.maxAttempts = maxAttempts;
         this.attempts = 0;
         guesses = new ArrayList<>(maxAttempts);
+        this.isOver = false;
     }
 
     public Game() {
@@ -50,6 +52,14 @@ public class Game {
 
     public void setGuesses(List<Guess> guesses) {
         this.guesses = guesses;
+    }
+
+    public boolean isOver() {
+        return isOver;
+    }
+
+    public void setOver(boolean isOver) {
+        this.isOver = isOver;
     }
 
     public void addGuess(Guess guess) {

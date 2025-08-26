@@ -5,8 +5,10 @@ import com.example.model.Game;
 import com.example.model.Guess;
 import com.example.model.User;
 import com.example.service.GameService;
+import com.example.service.UserService;
 import com.example.util.GuessChecker;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.ui.Model;
@@ -18,11 +20,13 @@ import java.util.List;
 
 @Controller
 public class GameController {
-
     private final GameService gameService;
+    private final UserService userService;
 
-    public GameController(GameService gameService) {
+    @Autowired
+    public GameController(GameService gameService, UserService userService) {
         this.gameService = gameService;
+        this.userService = userService;
     }
 
     /**
@@ -48,15 +52,46 @@ public class GameController {
             session.setAttribute("game", game);
         }
 
-        if (!game.getGuesses().isEmpty()) {
+        if (!game.getGuesses().isEmpty() && !game.isOver()) {
             Guess lastGuess = game.getGuesses().get(game.getGuesses().size() - 1);
 
             if (lastGuess.getFeedback().getCorrectPositions() == 4 && lastGuess.getFeedback().getCorrectNumbers() == 4) {
                 model.addAttribute("status", "You Win! :)");
+
+                if (user != null) {
+                    user.getUserStats().setGamesPlayed(user.getUserStats().getGamesPlayed() + 1);
+                    user.getUserStats().setGamesWon(user.getUserStats().getGamesWon() + 1);
+
+                    int score = game.getMaxAttempts() - game.getAttempts();
+                    user.getUserStats().setTotalScore(user.getUserStats().getTotalScore() + score);
+
+                    if (score > user.getUserStats().getBestScore()) {
+                        user.getUserStats().setBestScore(score);
+                    }
+
+                    int currentStreak = user.getUserStats().getCurrentWinStreak() + 1;
+                    user.getUserStats().setCurrentWinStreak(currentStreak);
+
+                    if (currentStreak > user.getUserStats().getLongestWinStreak()) {
+                        user.getUserStats().setLongestWinStreak(currentStreak);
+                    }
+
+                    game.setOver(true);
+                    userService.updateUser(user);
+                    session.setAttribute("user", user);
+                }
             }
 
             if (game.getAttempts() >= game.getMaxAttempts() && !model.containsAttribute("status")) {
                 model.addAttribute("status", "You Lose! :(");
+
+                if (user != null) {
+                    user.getUserStats().setGamesPlayed(user.getUserStats().getGamesPlayed() + 1);
+                    user.getUserStats().setCurrentWinStreak(0);
+                }
+                game.setOver(true);
+                userService.updateUser(user);
+                session.setAttribute("user", user);
             }
         }
 

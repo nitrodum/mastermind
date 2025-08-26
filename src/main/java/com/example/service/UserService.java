@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.model.User;
+import com.example.model.UserStats;
 import com.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +41,9 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(password);
         User user = new User(username, hashedPassword);
 
+        UserStats userStats = new UserStats();
+        user.setUserStats(userStats);
+
         return userRepository.save(user);
     }
 
@@ -66,5 +70,9 @@ public class UserService {
         } else {
             return Optional.empty();
         }
+    }
+
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 }
