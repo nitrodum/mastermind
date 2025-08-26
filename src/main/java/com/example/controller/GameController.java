@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.model.Feedback;
 import com.example.model.Game;
 import com.example.model.Guess;
+import com.example.model.User;
 import com.example.service.GameService;
 import com.example.util.GuessChecker;
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +37,11 @@ public class GameController {
     @GetMapping("/")
     public String index(HttpSession session, Model model) {
         Game game = (Game) session.getAttribute("game");
+        User user = (User) session.getAttribute("user");
+
+        if (user != null) {
+            model.addAttribute("username", user.getUsername());
+        }
 
         if (game == null) {
             game = gameService.createGame(10);
@@ -49,7 +55,7 @@ public class GameController {
                 model.addAttribute("status", "You Win! :)");
             }
 
-            if (game.getAttempts() >= game.getMaxAttempts()) {
+            if (game.getAttempts() >= game.getMaxAttempts() && !model.containsAttribute("status")) {
                 model.addAttribute("status", "You Lose! :(");
             }
         }

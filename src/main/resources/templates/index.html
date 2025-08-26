@@ -1,41 +1,324 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Mastermind</title>
-</head>
-<body>
-    <h1>Mastermind Game</h1>
+    <html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Mastermind</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-    <div id="game-board">
-        <span>Game board goes here</span>
-        <span>Max Attempts: </span> <span th:text="${maxAttempts}"></span>
-        <span> Attempts Left: </span><span th:text="${maxAttempts - attempts}"></span>
-        <p th:text="${code}">Code</p>
-        <form th:action="@{/guess}" method="post">
-            <input type="number" name="guess1" min="0" max="7" required/>
-            <input type="number" name="guess2" min="0" max="7" required/>
-            <input type="number" name="guess3" min="0" max="7" required/>
-            <input type="number" name="guess4" min="0" max="7" required/>
-            <button type="submit">Submit Guess</button>
-        </form>
-        <h3>Previous Guesses:</h3>
-        <ul>
-            <li th:each="guess : ${guesses}">
-                <span th:each="num : ${guess.guesses}" th:text="${num} + ' '"></span>
-                <span th:text="'Feedback object: ' + ${guess.feedback}"></span>
-            </li>
-        </ul>
-    </div>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f5f6fa;
+                min-height: 100vh;
+            }
 
-    <div>
-        <form th:action="@{/reset}" method="post">
-            <button type="submit">Reset Game</button>
-        </form>
-    </div>
+            .navbar {
+                background-color: #fff;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                padding: 1rem 2rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
 
-    <div>
-        <p th:text="${status}"> game status</p>
-    </div>
+            .navbar h1 {
+                color: #2c3e50;
+                font-size: 1.8rem;
+                font-weight: 600;
+            }
 
-</body>
-</html>
+            .user-section {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .username {
+                color: #2c3e50;
+                font-weight: 500;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                font-weight: 500;
+                text-decoration: none;
+                display: inline-block;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn-outline {
+                background-color: transparent;
+                color: #3498db;
+                border: 1px solid #3498db;
+            }
+
+            .btn-outline:hover {
+                background-color: #3498db;
+                color: white;
+            }
+
+            .btn-danger {
+                background-color: #e74c3c;
+                color: white;
+            }
+
+            .btn-danger:hover {
+                background-color: #c0392b;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            .game-header {
+                text-align: center;
+                margin-bottom: 2rem;
+                background: white;
+                padding: 1.5rem;
+                border-radius: 12px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            }
+
+            .game-stats {
+                display: flex;
+                justify-content: center;
+                gap: 2rem;
+                margin-top: 1rem;
+            }
+
+            .stat {
+                text-align: center;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+                color: #7f8c8d;
+                text-transform: uppercase;
+            }
+
+            .game-board {
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                margin-bottom: 1.5rem;
+            }
+
+            .guesses-grid {
+                margin-bottom: 2rem;
+            }
+
+            .guess-row {
+                display: flex;
+                justify-content: center;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .guess-cell {
+                width: 50px;
+                height: 50px;
+                border: 2px solid #d1d5db;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 1.2rem;
+                color: #2c3e50;
+                background: #f9f9f9;
+            }
+
+            .feedback {
+                margin-left: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .feedback-badge {
+                background: #3498db;
+                color: white;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                font-weight: 500;
+            }
+
+            .input-form {
+                text-align: center;
+            }
+
+            .input-row {
+                display: flex;
+                justify-content: center;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .number-input {
+                width: 50px;
+                height: 50px;
+                border: 2px solid #d1d5db;
+                border-radius: 8px;
+                text-align: center;
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .number-input:focus {
+                outline: none;
+                border-color: #3498db;
+            }
+
+            .btn-primary {
+                background-color: #3498db;
+                color: white;
+                padding: 0.75rem 2rem;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                margin: 0 0.5rem;
+            }
+
+            .btn-primary:hover {
+                background-color: #2980b9;
+            }
+
+            .btn-secondary {
+                background-color: #95a5a6;
+                color: white;
+                padding: 0.75rem 2rem;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                margin: 0 0.5rem;
+            }
+
+            .btn-secondary:hover {
+                background-color: #7f8c8d;
+            }
+
+            .status-message {
+                text-align: center;
+                margin-top: 1.5rem;
+                padding: 1rem;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+            .win {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .lose {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            .secret-code {
+                background: #2c3e50;
+                color: white;
+                padding: 1rem;
+                border-radius: 8px;
+                margin-top: 1rem;
+                text-align: center;
+                font-family: monospace;
+                font-size: 1.1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar">
+            <h1>🎯 Mastermind</h1>
+            <div class="user-section">
+                <div th:if="${username}" class="username">
+                    <span th:text="${username}"></span>!
+                    <form th:action="@{/auth/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
+                </div>
+                <div th:unless="${username}">
+                    <a th:href="@{/auth}" class="btn btn-outline">Login</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="game-header">
+                <h2>Crack the Code!</h2>
+                <p>Guess the 4-digit combination using numbers 0-7</p>
+                <div class="game-stats">
+                    <div class="stat">
+                        <div class="stat-value" th:text="${attempts}">0</div>
+                        <div class="stat-label">Attempts</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" th:text="${maxAttempts - attempts}">10</div>
+                        <div class="stat-label">Remaining</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-board">
+                <div class="guesses-grid">
+                    <div th:each="guess : ${guesses}" class="guess-row">
+                        <div class="guess-cell" th:each="num : ${guess.guesses}" th:text="${num}"></div>
+                        <div class="feedback">
+                            <span class="feedback-badge" th:text="${guess.feedback.correctNumbers} + ' Correct Numbers'"></span>
+                            <span class="feedback-badge" th:text="${guess.feedback.correctPositions} + ' Correct Positions'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-form" th:if="${attempts < maxAttempts and status == null}">
+                    <form th:action="@{/guess}" method="post">
+                        <div class="input-row">
+                            <input type="number" class="number-input" name="guess1" min="0" max="7" required/>
+                            <input type="number" class="number-input" name="guess2" min="0" max="7" required/>
+                            <input type="number" class="number-input" name="guess3" min="0" max="7" required/>
+                            <input type="number" class="number-input" name="guess4" min="0" max="7" required/>
+                        </div>
+                        <button type="submit" class="btn-primary">Submit Guess</button>
+                    </form>
+                </div>
+
+                <div class="input-form">
+                    <form th:action="@{/reset}" method="post" style="display: inline;">
+                        <button type="submit" class="btn-secondary">New Game</button>
+                    </form>
+                </div>
+
+                <div th:if="${status}" class="status-message" th:classappend="${status.contains('Win')} ? 'win' : 'lose'" th:text="${status}"></div>
+
+                <div th:if="${status}" class="secret-code">
+                    The secret code was: <span th:each="num : ${code}" th:text="${num} + ' '"></span>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
