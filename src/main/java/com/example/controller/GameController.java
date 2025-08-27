@@ -76,10 +76,10 @@ public class GameController {
                         user.getUserStats().setLongestWinStreak(currentStreak);
                     }
 
-                    game.setOver(true);
                     userService.updateUser(user);
                     session.setAttribute("user", user);
                 }
+                game.setOver(true);
             }
 
             if (game.getAttempts() >= game.getMaxAttempts() && !model.containsAttribute("status")) {
@@ -88,10 +88,11 @@ public class GameController {
                 if (user != null) {
                     user.getUserStats().setGamesPlayed(user.getUserStats().getGamesPlayed() + 1);
                     user.getUserStats().setCurrentWinStreak(0);
+
+                    userService.updateUser(user);
+                    session.setAttribute("user", user);
                 }
                 game.setOver(true);
-                userService.updateUser(user);
-                session.setAttribute("user", user);
             }
         }
 

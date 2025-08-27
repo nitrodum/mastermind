@@ -274,7 +274,7 @@
         <div class="container">
             <div class="game-header">
                 <h2>Crack the Code!</h2>
-                <p>Guess the 4-digit combination using numbers 0-7</p>
+                <p>Guess the 4-digit combination using numbers 0-7 under 10 guesses to win!</p>
                 <div class="game-stats">
                     <div class="stat">
                         <div class="stat-value" th:text="${attempts}">0</div>
@@ -282,7 +282,7 @@
                     </div>
                     <div class="stat">
                         <div class="stat-value" th:text="${maxAttempts - attempts}">10</div>
-                        <div class="stat-label">Remaining</div>
+                        <div class="stat-label">Score</div>
                     </div>
                 </div>
             </div>
