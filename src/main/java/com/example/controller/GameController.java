@@ -17,7 +17,6 @@ import java.util.Map;
 @Controller
 public class GameController {
     private final GameService gameService;
-    private final UserService userService;
     private final DailyGameService dailyGameService;
     private final DailySubmissionService dailySubmissionService;
     private final DailyStatsService dailyStatsService;
@@ -26,9 +25,8 @@ public class GameController {
     private static final int CODE_LENGTH = 4;
 
     @Autowired
-    public GameController(GameService gameService, UserService userService, DailyGameService dailyGameService, DailySubmissionService dailySubmissionService, DailyStatsService dailyStatsService, UserStatsService userStatsService) {
+    public GameController(GameService gameService , DailyGameService dailyGameService, DailySubmissionService dailySubmissionService, DailyStatsService dailyStatsService, UserStatsService userStatsService) {
         this.gameService = gameService;
-        this.userService = userService;
         this.dailyGameService = dailyGameService;
         this.dailySubmissionService = dailySubmissionService;
         this.dailyStatsService = dailyStatsService;
