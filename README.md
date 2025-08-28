@@ -8,18 +8,20 @@ The app uses Random.org (with retry and local fallback) to generate daily and in
 
 
 ## Table of contents
-- Features
-- Tech stack
-- Prerequisites
-- Quickstart (no DB install: H2 in-memory)
-- MySQL setup (production-like)
-- Build and run
-- Run tests
-- How to play
-- API reference
-- Architecture and code structure
-- Design notes and creative extensions
-- Troubleshooting
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Quickstart (H2 in-memory; no DB install)](#quickstart-h2-in-memory-no-db-install)
+- [MySQL setup (production-like)](#mysql-setup-production-like)
+- [Build and run](#build-and-run)
+- [Run in an IDE](#run-in-an-ide)
+- [Run tests](#run-tests)
+- [How to play](#how-to-play)
+- [API reference (selected)](#api-reference-selected)
+- [Architecture and code structure](#architecture-and-code-structure)
+- [Design notes and creative extensions](#design-notes-and-creative-extensions)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
 
 
 ## Features
@@ -116,6 +118,25 @@ FLUSH PRIVILEGES;
 Once running, visit http://localhost:8080.
 
 
+## Run in an IDE
+You can run the app directly from your IDE by executing the Spring Boot main class.
+
+- Main class: `com.example.MastermindApplication`
+- Location: `src/main/java/com/example/MastermindApplication.java`
+
+General steps:
+- Open the project (Open as Maven project). Ensure Project SDK is Java 17.
+- In the Project view, find `MastermindApplication.java` and click the green Run icon next to `main`.
+- For H2 (no DB install): Edit Run Configuration → Modify options → Add VM options, and add:
+  - `-Dspring.datasource.url=jdbc:h2:mem:mastermind`
+  - `-Dspring.datasource.driver-class-name=org.h2.Driver`
+  - `-Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect`
+  - `-Dspring.jpa.hibernate.ddl-auto=update`
+- For MySQL: ensure MySQL is running and `application.properties` has valid credentials; no extra VM options needed.
+
+Then browse http://localhost:8080.
+
+
 ## Run tests
 - Windows:
 ```powershell
@@ -207,4 +228,3 @@ Potential next steps:
 
 ## License
 For interview use; no specific license declared.
-
