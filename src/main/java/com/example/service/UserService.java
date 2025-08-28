@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.model.DailyStats;
 import com.example.model.User;
 import com.example.model.UserStats;
 import com.example.repository.UserRepository;
@@ -41,8 +42,11 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(password);
         User user = new User(username, hashedPassword);
 
-        UserStats userStats = new UserStats();
+        UserStats userStats = new UserStats(user);
         user.setUserStats(userStats);
+
+        DailyStats dailyStats = new DailyStats(user);
+        user.setDailyStats(dailyStats);
 
         return userRepository.save(user);
     }

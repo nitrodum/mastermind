@@ -12,6 +12,8 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserStats userStats;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private DailyStats dailyStats;
 
     public User(String username, String password) {
         this.username = username;
@@ -54,6 +56,18 @@ public class User {
 
         if(userStats != null) {
             userStats.setUser(this);
+        }
+    }
+
+    public DailyStats getDailyStats() {
+        return dailyStats;
+    }
+
+    public void setDailyStats(DailyStats dailyStats) {
+        this.dailyStats = dailyStats;
+
+        if(dailyStats != null) {
+            dailyStats.setUser(this);
         }
     }
 }

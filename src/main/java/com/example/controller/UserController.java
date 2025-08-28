@@ -43,10 +43,15 @@ public class UserController {
 
     @PostMapping("/login")
     public String loginUser(@RequestParam String username, @RequestParam String password, HttpSession session, Model model) {
-        Optional<User> user = userService.loginUser(username, password);
+        Optional<User> userOptional = userService.loginUser(username, password);
 
-        if(user.isPresent()) {
-            session.setAttribute("user", user.get());
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
+            session.setAttribute("username", user.getUsername());
+            session.setAttribute("user", user);
+            session.setAttribute("userStats", user.getUserStats());
+            session.setAttribute("dailyStats", user.getDailyStats());
+            session.setAttribute("gameMode", "daily");
             return "redirect:/";
         } else {
             model.addAttribute("message", "Invalid username or password");
@@ -58,7 +63,11 @@ public class UserController {
 
     @PostMapping("/logout")
     public String logoutUser(HttpSession session) {
+        session.removeAttribute("username");
         session.removeAttribute("user");
+        session.removeAttribute("userStats");
+        session.removeAttribute("dailyStats");
+        session.removeAttribute("gameMode");
         session.removeAttribute("game");
         return "redirect:/";
     }

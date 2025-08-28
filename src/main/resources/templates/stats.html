@@ -33,18 +33,20 @@
         .user-section {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-right: 2rem;
+            gap: 1.5rem; /* Match the main page spacing */
         }
 
         .username {
             color: #2c3e50;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .btn {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -52,27 +54,31 @@
             font-weight: 500;
             text-decoration: none;
             display: inline-block;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .btn-outline {
             background-color: transparent;
             color: #3498db;
-            border: 1px solid #3498db;
+            border: 2px solid #3498db;
         }
 
         .btn-outline:hover {
             background-color: #3498db;
             color: white;
+            transform: translateY(-1px);
         }
 
         .btn-danger {
             background-color: #e74c3c;
             color: white;
+            border: 2px solid #e74c3c;
         }
 
         .btn-danger:hover {
             background-color: #c0392b;
+            border-color: #c0392b;
+            transform: translateY(-1px);
         }
 
         .container {
@@ -174,17 +180,20 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>🎯 Mastermind</h1>
-        <div class="user-section">
-            <div th:if="${session.user}" class="username">
-                <span th:text="${session.user.username}"></span>
-                <form th:action="@{/auth/logout}" method="post" style="display: inline;">
-                    <button type="submit" class="btn btn-danger">Logout</button>
-                </form>
-            </div>
+<nav class="navbar">
+    <h1>Mastermind</h1>
+    <div class="user-section">
+        <div th:if="${session.user}" class="username" th:text="${session.user.username}"></div>
+        <div th:if="${session.user}">
+            <a th:href="@{/stats}" class="btn btn-outline">Stats</a>
         </div>
-    </nav>
+        <div th:if="${session.user}">
+            <form th:action="@{/auth/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
 
     <div class="container">
         <div class="stats-header">

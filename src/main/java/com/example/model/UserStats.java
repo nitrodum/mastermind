@@ -19,12 +19,17 @@ public class UserStats {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    public UserStats() {
+    public UserStats(User user) {
         this.gamesPlayed = 0;
         this.gamesWon = 0;
         this.bestScore = 0;
         this.totalScore = 0;
         this.longestWinStreak = 0;
+        this.user = user;
+        this.currentWinStreak = 0;
+    }
+
+    public UserStats() {
     }
 
     public long getId() {
@@ -97,6 +102,25 @@ public class UserStats {
 
     public double getAverageScore() {
         return gamesWon == 0 ? 0.0 : (double) totalScore / gamesPlayed;
+    }
+
+    public void gameWon(int score) {
+        this.gamesPlayed++;
+        this.gamesWon++;
+        this.totalScore += score;
+        if(this.bestScore == 0 || score < this.bestScore) {
+            this.bestScore = score;
+        }
+        this.currentWinStreak++;
+        if(this.currentWinStreak > this.longestWinStreak) {
+            this.longestWinStreak = this.currentWinStreak;
+        }
+    }
+
+    public void gameLost(int score) {
+        this.gamesPlayed++;
+        this.totalScore += score;
+        this.currentWinStreak = 0;
     }
 
 }

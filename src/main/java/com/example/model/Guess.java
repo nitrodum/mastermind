@@ -1,6 +1,5 @@
 package com.example.model;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Guess {
