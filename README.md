@@ -9,6 +9,9 @@ The app uses Random.org (with retry and local fallback) to generate daily and in
 
 ## Table of contents
 - [Features](#features)
+  - [Daily mode](#daily-mode)
+  - [Stats page](#stats-page)
+  - [Daily leaderboard](#daily-leaderboard)
 - [Tech stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Quickstart (H2 in-memory; no DB install)](#quickstart-h2-in-memory-no-db-install)
@@ -31,6 +34,29 @@ The app uses Random.org (with retry and local fallback) to generate daily and in
 - Percentile stats comparing your attempts to other players for that day.
 - Infinite mode for quick play without login.
 - Unit tests for services and core guess-checking utility.
+
+### Daily mode
+- One shared code per UTC day; created automatically at midnight UTC.
+- Requires login. The session’s game mode defaults to daily for authenticated users.
+- Exactly one submission per user per day is recorded. If you revisit after submitting, you’ll see the daily completion view.
+- On win or loss, your submission is stored with attempts and submission time; percentile stats are computed against all submissions for that date.
+- The daily game uses UTC normalization so it’s consistent globally.
+
+### Stats page
+- Route: /stats. Requires login.
+- Toggle between daily and infinite stats via a mode selector.
+- Shows:
+  - Games played, games won, win rate
+  - Best score (fewest attempts), average score
+  - Current streak and longest streak
+- Stats update via DailyStats/UserStats service methods on each game completion.
+
+### Daily leaderboard
+- Optional extension built on top of DailySubmission data.
+- Backed by DailySubmissionService and repository queries for a given gameDate.
+- Typical ranking: sort by attempts ascending, then by submittedAt ascending; show top N and ties.
+- Can be displayed on a dedicated page (e.g., /leaderboard?date=YYYY-MM-DD) or as part of the daily completion modal.
+- Current project exposes the data needed (today’s submissions endpoint) and percentile stats; the UI view can be added easily.
 
 
 ## Tech stack
@@ -125,14 +151,25 @@ You can run the app directly from your IDE by executing the Spring Boot main cla
 - Location: `src/main/java/com/example/MastermindApplication.java`
 
 General steps:
-- Open the project (Open as Maven project). Ensure Project SDK is Java 17.
-- In the Project view, find `MastermindApplication.java` and click the green Run icon next to `main`.
-- For H2 (no DB install): Edit Run Configuration → Modify options → Add VM options, and add:
-  - `-Dspring.datasource.url=jdbc:h2:mem:mastermind`
-  - `-Dspring.datasource.driver-class-name=org.h2.Driver`
-  - `-Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect`
-  - `-Dspring.jpa.hibernate.ddl-auto=update`
-- For MySQL: ensure MySQL is running and `application.properties` has valid credentials; no extra VM options needed.
+- IntelliJ IDEA
+  - Open the project (Open as Maven project). Ensure Project SDK is Java 17.
+  - In the Project view, find `MastermindApplication.java` and click the green Run icon next to `main`.
+  - For H2 (no DB install): Edit Run Configuration → Modify options → Add VM options, and add:
+    - `-Dspring.datasource.url=jdbc:h2:mem:mastermind`
+    - `-Dspring.datasource.driver-class-name=org.h2.Driver`
+    - `-Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect`
+    - `-Dspring.jpa.hibernate.ddl-auto=update`
+  - For MySQL: ensure MySQL is running and `application.properties` has valid credentials; no extra VM options needed.
+
+- Eclipse
+  - File → Import → Existing Maven Projects. Ensure JRE is Java 17.
+  - Right-click `MastermindApplication.java` → Run As → Java Application.
+  - H2 VM args: Run → Run Configurations… → Java Application → Arguments → VM arguments, add the same `-D...` properties as above.
+
+- VS Code (with Java and Spring extensions)
+  - Open the folder, let VS Code import the Maven project.
+  - Open `MastermindApplication.java` and click “Run” above the `main` method.
+  - H2 VM args: create or edit `.vscode/launch.json` and add `"vmArgs"` with the same `-D...` properties, or use the Run configuration UI to add VM arguments.
 
 Then browse http://localhost:8080.
 
