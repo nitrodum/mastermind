@@ -33,7 +33,7 @@
         .user-section {
             display: flex;
             align-items: center;
-            gap: 1.5rem; /* Match the main page spacing */
+            gap: 1.5rem;
         }
 
         .username {
@@ -103,6 +103,47 @@
 
         .stats-header p {
             color: #7f8c8d;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-selector {
+            display: flex;
+            background: #f8f9fa;
+            padding: 0.25rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            gap: 0.5rem;
+        }
+
+        .toggle-btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            background-color: transparent;
+            color: #6c757d;
+        }
+
+        .toggle-btn.active {
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+        }
+
+        .toggle-btn:hover:not(.active) {
+            background-color: #e9ecef;
+            color: #495057;
         }
 
         .stats-grid {
@@ -177,17 +218,24 @@
         .btn-primary:hover {
             background-color: #2980b9;
         }
+
+        @media (max-width: 768px) {
+            .toggle-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
 <nav class="navbar">
     <h1>Mastermind</h1>
     <div class="user-section">
-        <div th:if="${session.user}" class="username" th:text="${session.user.username}"></div>
-        <div th:if="${session.user}">
+        <div th:if="${username}" class="username" th:text="${username}"></div>
+        <div th:if="${username}">
             <a th:href="@{/stats}" class="btn btn-outline">Stats</a>
         </div>
-        <div th:if="${session.user}">
+        <div th:if="${username}">
             <form th:action="@{/auth/logout}" method="post" style="display: inline;">
                 <button type="submit" class="btn btn-danger">Logout</button>
             </form>
@@ -195,64 +243,79 @@
     </div>
 </nav>
 
-    <div class="container">
-        <div class="stats-header">
-            <h2>Your Game Statistics</h2>
-            <p>Track your Mastermind progress and achievements</p>
-        </div>
+<div class="container">
+    <div class="stats-header">
+        <h2>Your Game Statistics</h2>
+        <p>Track your Mastermind progress and achievements</p>
 
-        <div class="stats-grid" th:if="${session.userStats}">
-            <div class="stat-card">
-                <div class="stat-value" th:text="${session.userStats.gamesPlayed}">0</div>
-                <div class="stat-label">Games Played</div>
-                <div class="stat-description">Total games started</div>
+        <div class="stats-toggle">
+            <div class="toggle-selector">
+                <a th:href="@{/stats(mode='infinite')}"
+                   class="toggle-btn"
+                   th:classappend="${statsMode == 'infinite'} ? 'active' : ''">
+                    Infinite Mode
+                </a>
+                <a th:href="@{/stats(mode='daily')}"
+                   class="toggle-btn"
+                   th:classappend="${statsMode == 'daily'} ? 'active' : ''">
+                    Daily Mode
+                </a>
             </div>
-
-            <div class="stat-card">
-                <div class="stat-value" th:text="${session.userStats.gamesWon}">0</div>
-                <div class="stat-label">Games Won</div>
-                <div class="stat-description">Successfully cracked codes</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-value percentage" th:text="${#numbers.formatDecimal(session.userStats.winRate, 1, 1)} + '%'">0.0%</div>
-                <div class="stat-label">Win Rate</div>
-                <div class="stat-description">Percentage of games won</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-value score" th:text="${session.userStats.bestScore}">0</div>
-                <div class="stat-label">Best Score</div>
-                <div class="stat-description">Fewest attempts to win</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-value score" th:text="${#numbers.formatDecimal(session.userStats.averageScore, 1, 1)}">0.0</div>
-                <div class="stat-label">Average Score</div>
-                <div class="stat-description">Average attempts per game</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-value streak" th:text="${session.userStats.longestWinStreak}">0</div>
-                <div class="stat-label">Longest Win Streak</div>
-                <div class="stat-description">Most consecutive wins</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-value streak" th:text="${session.userStats.currentWinStreak}">0</div>
-                <div class="stat-label">Current Win Streak</div>
-                <div class="stat-description">Active consecutive wins</div>
-            </div>
-        </div>
-
-        <div th:unless="${session.userStats}" class="stats-header">
-            <h3>No statistics available</h3>
-            <p>Start playing some games to see your stats here!</p>
-        </div>
-
-        <div class="back-button">
-            <a th:href="@{/}" class="btn-primary">Back to Game</a>
         </div>
     </div>
+
+    <div class="stats-grid" th:if="${currentStats}">
+        <div class="stat-card">
+            <div class="stat-value" th:text="${statsMode == 'daily'} ? ${currentStats.dailyGamesPlayed} : ${currentStats.gamesPlayed}">0</div>
+            <div class="stat-label">Games Played</div>
+            <div class="stat-description">Total games started</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value" th:text="${statsMode == 'daily'} ? ${currentStats.dailyGamesWon} : ${currentStats.gamesWon}">0</div>
+            <div class="stat-label">Games Won</div>
+            <div class="stat-description">Successfully cracked codes</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value percentage" th:text="${#numbers.formatDecimal(currentStats.winRate, 1, 1)} + '%'">0.0%</div>
+            <div class="stat-label">Win Rate</div>
+            <div class="stat-description">Percentage of games won</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value score" th:text="${statsMode == 'daily'} ? ${currentStats.dailyBestScore} : ${currentStats.bestScore}">0</div>
+            <div class="stat-label">Best Score</div>
+            <div class="stat-description">Fewest attempts to win</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value score" th:text="${#numbers.formatDecimal(currentStats.averageScore, 1, 1)}">0.0</div>
+            <div class="stat-label">Average Score</div>
+            <div class="stat-description">Average attempts per game</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value streak" th:text="${statsMode == 'daily'} ? ${currentStats.dailyLongestWinStreak} : ${currentStats.longestWinStreak}">0</div>
+            <div class="stat-label">Longest Win Streak</div>
+            <div class="stat-description">Most consecutive wins</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value streak" th:text="${statsMode == 'daily'} ? ${currentStats.dailyCurrentWinStreak} : ${currentStats.currentWinStreak}">0</div>
+            <div class="stat-label">Current Win Streak</div>
+            <div class="stat-description">Active consecutive wins</div>
+        </div>
+    </div>
+
+    <div th:unless="${currentStats}" class="stats-header">
+        <h3>No statistics available</h3>
+        <p th:text="'Start playing some ' + ${statsMode} + ' games to see your stats here!'">Start playing some games to see your stats here!</p>
+    </div>
+
+    <div class="back-button">
+        <a th:href="@{/}" class="btn-primary">Back to Game</a>
+    </div>
+</div>
 </body>
 </html>
