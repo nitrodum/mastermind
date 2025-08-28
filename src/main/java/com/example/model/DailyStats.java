@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 @Entity
 public class DailyStats {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private long id;
     private int dailyGamesPlayed;
     private int dailyGamesWon;

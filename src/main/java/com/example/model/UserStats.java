@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 @Entity
 public class UserStats {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private long id;
 
     private int gamesPlayed;

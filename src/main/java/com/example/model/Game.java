@@ -9,6 +9,7 @@ public class Game {
     private int attempts;
     private List<Guess> guesses;
     private boolean isOver;
+    private boolean isWon;
 
     public Game(List<Integer> code, int maxAttempts) {
         this.code = code;
@@ -60,6 +61,14 @@ public class Game {
 
     public void setOver(boolean isOver) {
         this.isOver = isOver;
+    }
+
+    public boolean isWon() {
+        return isWon;
+    }
+
+    public void setWon(boolean won) {
+        isWon = won;
     }
 
     public void addGuess(Guess guess) {

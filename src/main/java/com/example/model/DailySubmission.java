@@ -3,6 +3,7 @@ package com.example.model;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.Map;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "gameDate"}))
@@ -67,4 +68,5 @@ public class DailySubmission {
     public void setUser(User user) {
         this.user = user;
     }
+
 }

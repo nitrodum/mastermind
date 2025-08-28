@@ -344,6 +344,155 @@
                 font-family: monospace;
                 font-size: 1.1rem;
             }
+
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .daily-modal {
+                background: white;
+                border-radius: 12px;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                animation: modalSlideIn 0.3s ease-out;
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .modal-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid #e9ecef;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-header h3 {
+                color: #2c3e50;
+                margin: 0;
+                font-size: 1.5rem;
+            }
+
+            .close-btn {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #7f8c8d;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .close-btn:hover {
+                color: #2c3e50;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .completion-message {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .completion-message h4 {
+                color: #27ae60;
+                font-size: 1.3rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .stats-comparison {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .percentile-display {
+                text-align: center;
+            }
+
+            .percentile-circle {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #3498db, #2c3e50);
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1rem auto;
+            }
+
+            .percentile-number {
+                font-size: 2rem;
+                font-weight: bold;
+            }
+
+            .percentile-label {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+
+            .percentile-message {
+                color: #7f8c8d;
+                font-weight: 500;
+            }
+
+            .comparison-stats {
+                display: flex;
+                justify-content: space-around;
+                text-align: center;
+            }
+
+            .stat-item {
+                flex: 1;
+            }
+
+            .stat-number {
+                display: block;
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+                color: #7f8c8d;
+                text-transform: uppercase;
+            }
+
+            .modal-footer {
+                padding: 1.5rem;
+                border-top: 1px solid #e9ecef;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
@@ -431,5 +580,65 @@
                 </div>
             </div>
         </div>
+
+        <div th:if="${session.showDailyModal == true}" class="modal-overlay" onclick="closeDailyModal()">
+            <div class="daily-modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>Daily Challenge Complete!</h3>
+                    <button class="close-btn" onclick="closeDailyModal()">&times;</button>
+                </div>
+
+                <div class="modal-body" th:if="${session.percentileStats}">
+                    <div class="completion-message">
+                        <h4 th:if="${attempts <= 7}">🎉 Congratulations!</h4>
+                        <h4 th:if="${attempts > 7}">💪 Good effort!</h4>
+                        <p th:if="${isWon == ture}">You solved today's puzzle in <strong th:text="${attempts}">X</strong> attempts!</p>
+                        <p th:if="${isWon == false}">You didn't solve today's puzzle. Better luck tomorrow!</p>
+                    </div>
+
+                    <div class="stats-comparison">
+                        <div class="percentile-display">
+                            <div class="percentile-circle">
+                                <span class="percentile-number" th:text="${#numbers.formatDecimal(session.percentileStats.percentile, 1, 0)} + '%'">0%</span>
+                                <span class="percentile-label">Percentile</span>
+                            </div>
+                            <p class="percentile-message" th:text="${session.percentileStats.percentile <= 10} ? 'Excellent! Top 10%' : (${session.percentileStats.percentile <= 25} ? 'Great! Top 25%' : (${session.percentileStats.percentile <= 50} ? 'Good! Above average' : (${session.percentileStats.percentile <= 75} ? 'Not bad! Top 75%' : 'Keep practicing!')))">Keep practicing!</p>
+                        </div>
+
+                        <div class="comparison-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" th:text="${session.percentileStats.betterThan}">0</span>
+                                <span class="stat-label">players with lower or same score</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" th:text="${session.percentileStats.sameScore}">0</span>
+                                <span class="stat-label">players with same score</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" th:text="${session.percentileStats.totalPlayers}">0</span>
+                                <span class="stat-label">total players today</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="closeDailyModal()">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function closeDailyModal() {
+                fetch('/close-daily-modal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }).then(() => {
+                    document.querySelector('.modal-overlay').style.display = 'none';
+                });
+            }
+        </script>
     </body>
     </html>

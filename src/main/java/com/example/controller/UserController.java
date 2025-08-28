@@ -52,6 +52,7 @@ public class UserController {
             session.setAttribute("userStats", user.getUserStats());
             session.setAttribute("dailyStats", user.getDailyStats());
             session.setAttribute("gameMode", "daily");
+            session.removeAttribute("game");
             return "redirect:/";
         } else {
             model.addAttribute("message", "Invalid username or password");

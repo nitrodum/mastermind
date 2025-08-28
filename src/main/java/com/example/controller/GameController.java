@@ -6,14 +6,12 @@ import com.example.util.GuessChecker;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -24,6 +22,8 @@ public class GameController {
     private final DailySubmissionService dailySubmissionService;
     private final DailyStatsService dailyStatsService;
     private final UserStatsService userStatsService;
+    private static final int MAX_ATTEMPTS = 10;
+    private static final int CODE_LENGTH = 4;
 
     @Autowired
     public GameController(GameService gameService, UserService userService, DailyGameService dailyGameService, DailySubmissionService dailySubmissionService, DailyStatsService dailyStatsService, UserStatsService userStatsService) {
@@ -39,6 +39,8 @@ public class GameController {
      * Handles the main game page.
      * Initializes a new game if one does not exist in the session.
      * Adds game status and details to the model for rendering.
+     * Creates a new game if none exists in the session, handles daily game completion checks,
+     * and sets up the appropriate game mode based on user authentication status.
      *
      * @param session the HTTP session to store and retrieve the game
      * @param model the model to pass attributes to the view
@@ -69,13 +71,16 @@ public class GameController {
 
         model.addAttribute("gameMode", gameMode);
 
-        if (game == null) {
-            if (gameMode.equals("daily")) {
+        if (gameMode.equals("daily")) {
+            if (game == null) {
                 game = createDailyGame();
-            } else {
-                game = gameService.createGame(10);
+                session.setAttribute("game", game);
             }
-            session.setAttribute("game", game);
+        } else {
+            if (game == null) {
+                game = gameService.createGame(MAX_ATTEMPTS);
+                session.setAttribute("game", game);
+            }
         }
 
         checkGameCompletion(game, user, session, model);
@@ -88,6 +93,14 @@ public class GameController {
         return "index";
     }
 
+    /**
+     * Switches between game modes (daily or infinite) and resets the current game.
+     * Removes the existing game from session to force creation of a new game in the selected mode.
+     *
+     * @param mode the game mode to switch to ("daily" or "infinite")
+     * @param session the HTTP session to update with the new game mode
+     * @return redirect to the main game page to initialize the new mode
+     */
     @GetMapping("/mode/{mode}")
     public String switchMode(@PathVariable String mode, HttpSession session) {
         if (mode.equals("daily") || mode.equals("infinite")) {
@@ -101,7 +114,7 @@ public class GameController {
      * Handles a guess submission from the user.
      * Retrieves the current game from the session, checks the user's guess,
      * creates a new Guess object with feedback, and adds it to the game.
-     * Redirects back to the main game page.
+     * Redirects back to the main game page .Prevents multiple submissions for daily games.
      *
      * @param guess1 the first number of the guess
      * @param guess2 the second number of the guess
@@ -154,14 +167,22 @@ public class GameController {
         return "redirect:/";
     }
 
+    @PostMapping("/close-daily-modal")
+    @ResponseBody
+    public String closeDailyModal(HttpSession session) {
+        session.removeAttribute("showDailyModal");
+        session.removeAttribute("percentileStats");
+        return "success";
+    }
+
     private void checkGameCompletion(Game game, User user, HttpSession session, Model model) {
         if (game.getGuesses().isEmpty() || game.isOver()) {
             return;
         }
 
         Guess lastGuess = game.getGuesses().get(game.getGuesses().size() - 1);
-        boolean isWin = lastGuess.getFeedback().getCorrectNumbers() == 4 &&
-                        lastGuess.getFeedback().getCorrectPositions() == 4;
+        boolean isWin = lastGuess.getFeedback().getCorrectNumbers() == CODE_LENGTH &&
+                        lastGuess.getFeedback().getCorrectPositions() == CODE_LENGTH;
         boolean isLoss = game.getAttempts() >= game.getMaxAttempts();
 
         if (isWin) {
@@ -174,6 +195,7 @@ public class GameController {
     private void handleGameWin(Game game, User user, HttpSession session, Model model) {
         model.addAttribute("status", "You Win! :)");
         game.setOver(true);
+        game.setWon(true);
 
         if (user != null) {
             if (session.getAttribute("gameMode").equals("daily")) {
@@ -184,13 +206,7 @@ public class GameController {
                 }
 
                 updateDailyStatsForWin(game, user, session);
-                DailySubmission submission = new DailySubmission(
-                        game.getAttempts(),
-                        new Date(),
-                        today,
-                        user
-                );
-                dailySubmissionService.saveDailySubmission(submission);
+                updateDailyStats(user, game, session);
             } else {
                updateInfiniteStatsForWin(game, user, session);
             }
@@ -200,6 +216,7 @@ public class GameController {
     private void handleGameLoss(Game game, User user, HttpSession session, Model model) {
         model.addAttribute("status", "You Lose! :(");
         game.setOver(true);
+        game.setWon(false);
 
         if (user != null) {
             if (session.getAttribute("gameMode").equals("daily")) {
@@ -210,13 +227,7 @@ public class GameController {
                 }
 
                 updateDailyStatsForLoss(game, user, session);
-                DailySubmission submission = new DailySubmission(
-                        game.getAttempts(),
-                        new Date(),
-                        today,
-                        user
-                );
-                dailySubmissionService.saveDailySubmission(submission);
+                updateDailyStats(user, game, session);
             } else {
                 updateInfiniteStatsForLoss(game, user, session);
             }
@@ -267,8 +278,27 @@ public class GameController {
         session.setAttribute("user", user);
     }
 
+    private void updateDailyStats(User user, Game game, HttpSession session) {
+        DailyGame dailyGame = dailyGameService.getTodaysDailyGame();
+
+        DailySubmission submission = new DailySubmission(
+                game.getAttempts(), new Date(), dailyGame.getDate(), user);
+        dailySubmissionService.saveDailySubmission(submission);
+
+        Map<String, Object> percentileStats = dailySubmissionService.calculatePercentileStats(
+                dailyGame.getDate(), game.getAttempts());
+        session.setAttribute("isWon", game.isWon());
+        session.setAttribute("percentileStats", percentileStats);
+        session.setAttribute("showDailyModal", true);
+    }
+
+    /**
+     * Creates a new daily game using today's predefined code from the database.
+     *
+     * @return a new Game instance with today's daily code and standard attempt limit
+     */
     private Game createDailyGame() {
         DailyGame todayGame = dailyGameService.getTodaysDailyGame();
-        return new Game(todayGame.getCodeAsList(), 10);
+        return new Game(todayGame.getCodeAsList(), MAX_ATTEMPTS);
     }
 }
