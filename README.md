@@ -35,12 +35,23 @@ The app uses Random.org (with retry and local fallback) to generate daily and in
 - Infinite mode for quick play without login.
 - Unit tests for services and core guess-checking utility.
 
+<img width="1869" height="837" alt="image" src="https://github.com/user-attachments/assets/8a4c54b6-55bf-4c2e-af05-b8e30b4acd6c" />
+
+<img width="1866" height="909" alt="image" src="https://github.com/user-attachments/assets/566f2955-8f07-4aeb-bda7-10e27474ad9c" />
+
+
 ### Daily mode
 - One shared code per UTC day; created automatically at midnight UTC.
 - Requires login. The session’s game mode defaults to daily for authenticated users.
 - Exactly one submission per user per day is recorded. If you revisit after submitting, you’ll see the daily completion view.
 - On win or loss, your submission is stored with attempts and submission time; percentile stats are computed against all submissions for that date.
 - The daily game uses UTC normalization so it’s consistent globally.
+
+<img width="1866" height="916" alt="image" src="https://github.com/user-attachments/assets/a6b87dcf-f0f0-4c2f-a869-f260df3dd8cb" />
+
+
+<img width="1862" height="909" alt="image" src="https://github.com/user-attachments/assets/87b72c39-b740-4070-bbb4-97539659c09e" />
+
 
 ### Stats page
 - Route: /stats. Requires login.
@@ -51,12 +62,20 @@ The app uses Random.org (with retry and local fallback) to generate daily and in
   - Current streak and longest streak
 - Stats update via DailyStats/UserStats service methods on each game completion.
 
+<img width="1848" height="916" alt="image" src="https://github.com/user-attachments/assets/51588c2e-7afa-4c8a-b56d-0251b3b079ab" />
+
+<img width="1857" height="909" alt="image" src="https://github.com/user-attachments/assets/02118502-509f-4d23-82f7-e23f0e13b401" />
+
+
+
 ### Daily leaderboard
 - Optional extension built on top of DailySubmission data.
 - Backed by DailySubmissionService and repository queries for a given gameDate.
 - Typical ranking: sort by attempts ascending, then by submittedAt ascending; show top N and ties.
 - Can be displayed on a dedicated page (e.g., /leaderboard?date=YYYY-MM-DD) or as part of the daily completion modal.
 - Current project exposes the data needed (today’s submissions endpoint) and percentile stats; the UI view can be added easily.
+
+<img width="1854" height="884" alt="image" src="https://github.com/user-attachments/assets/e595ff68-8148-4eb5-a57a-66fb4a75f899" />
 
 
 ## Tech stack
